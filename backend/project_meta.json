@@ -55,6 +55,10 @@
     {
       "title": "MFA・監査ログ設定を、憶測ではなく実環境の確認・操作で裏付け",
       "body": "非機能要件のMFA(多要素認証)は、Microsoft Entra管理センターで確認したところ「セキュリティの既定値群」が既に有効で、テナント全体に最初から適用されていたことが判明した(未設定と誤って評価していたものを訂正)。Dataverse監査ログは、組織全体の設定はWeb API(organizations.isauditenabled)で有効化できたが、テーブル単位の監査(IsAuditEnabled)はWeb API v9.2経由の更新が\"Operation not supported on EntityMetadata\"で一貫して失敗し、複数のペイロード形式を試した末にPower Appsの管理画面(テーブル設定 > 詳細オプション)から手動で有効化する方針に切り替えた。最終的にAPIで両方の設定値を直接取得し、実際に有効化されていることを確認した。"
+    },
+    {
+      "title": "バックアップ復元・負荷テストを、書類ではなく実際の操作で検証",
+      "body": "非機能要件の裏付けとして、文書作成に頼らずまず実際に手を動かす方針で進めた。バックアップは pac admin backup で手動作成し、pac admin restore で復元コマンドを実行、「作成直後の手動バックアップは復元可能になるまで時間を要する」という仕様上の制約を実際のエラーメッセージから確認した(新環境への復元も試みたが、テナント側のリージョン指定制約により断念し、同一環境への復元に切り替えて検証)。ポイントインタイム復元については pac admin list で環境種別が Developer であることを確認し、本番相当環境限定の機能であるため利用不可であることをドキュメントの記載通り実証した。負荷テストは、JMeterの代わりに concurrent.futures による疑似10並列アクセスをDataverse Web APIに対して実施し、100リクエスト全て成功・平均応答624ms・95パーセンタイル728msという実測値を得た。"
     }
   ],
   "requirement_progress": {
@@ -68,8 +72,8 @@
     },
     "non_functional": {
       "total": 44,
-      "done": 25,
-      "not_started": 13,
+      "done": 28,
+      "not_started": 10,
       "unconfirmed": 6
     },
     "notable_gaps": [
