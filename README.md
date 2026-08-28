@@ -11,15 +11,13 @@
 | ディレクトリ | 内容 | 技術スタック |
 |---|---|---|
 | [`backend/`](backend/README.md) | Dataverseのテーブル・セキュリティロールを Web API + Python でコード化(Infrastructure as Code) | Python, Dataverse Web API, Power Automate |
-| `map/` | 樹木の位置をAzure Mapsで表示するPCF(PowerApps Component Framework)カスタムコントロール | TypeScript, React, azure-maps-control, PCF |
+| [`map/`](map/README.md) | 樹木の位置をAzure Mapsで表示するPCF(PowerApps Component Framework)カスタムコントロール | TypeScript, React, azure-maps-control, PCF |
 
-詳細なデータモデル・セキュリティロール設計・要件定義プロセス・実装進捗は [`backend/README.md`](backend/README.md) を参照してください。
-
-`map/` は現時点では専用READMEを未整備です(TreeMapControlの実装、Azure Maps連携、PCFビルドツールの既知の不具合(node_modules誤トランスパイル)への対処である `fix-pcf-webpack.js` などが含まれます)。
+詳細なデータモデル・セキュリティロール設計・要件定義プロセス・実装進捗は [`backend/README.md`](backend/README.md) を、地図コントロールの実装・不具合修正の記録は [`map/README.md`](map/README.md) を参照してください。
 
 ## セットアップ
 
-各ディレクトリのREADME・スクリプト内コメントを参照してください。`map/` は初回のみ `npm install` が必要です(`postinstall` フックで PCF ビルドツールへの既知の不具合パッチが自動適用されます)。
+各ディレクトリのREADMEを参照してください。`map/` は初回のみ `npm install` が必要です(`postinstall` フックで PCF ビルドツールへの既知の不具合パッチが自動適用されます)。
 
 ---
 
