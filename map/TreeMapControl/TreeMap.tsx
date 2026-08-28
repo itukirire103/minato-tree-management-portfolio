@@ -9,6 +9,10 @@ export interface ITreeMapProps {
     records: ITreeRecord[];
     webAPI: ComponentFramework.WebApi;
     onRecordClick?: (id: string) => void;
+    canEditPosition?: boolean;
+    canCreate?: boolean;
+    onPositionChanged?: (id: string, latitude: number, longitude: number) => void;
+    onCreateNew?: (latitude: number, longitude: number) => void;
 }
 
 export interface ITreeRecord {
@@ -36,8 +40,16 @@ export const TreeMap: React.FC<ITreeMapProps> = (props) => {
     const dataSourceRef = React.useRef<atlas.source.DataSource | null>(null);
     const recordsRef = React.useRef(props.records);
     const onRecordClickRef = React.useRef(props.onRecordClick);
+    const canEditPositionRef = React.useRef(props.canEditPosition);
+    const canCreateRef = React.useRef(props.canCreate);
+    const onPositionChangedRef = React.useRef(props.onPositionChanged);
+    const onCreateNewRef = React.useRef(props.onCreateNew);
     recordsRef.current = props.records;
     onRecordClickRef.current = props.onRecordClick;
+    canEditPositionRef.current = props.canEditPosition;
+    canCreateRef.current = props.canCreate;
+    onPositionChangedRef.current = props.onPositionChanged;
+    onCreateNewRef.current = props.onCreateNew;
 
     // Azure Mapsのサブスクリプションキー。PCF側(notifyOutputChanged経由)の
     // 再描画シグナルには頼らず、Reactコンポーネント自身のstateとして管理する。
@@ -143,22 +155,78 @@ export const TreeMap: React.FC<ITreeMapProps> = (props) => {
             });
             map.layers.add(bubbleLayer);
 
-            // ---- ポイントクリックで樹木情報画面に遷移(機能要件#28) ----
-            // bubbleLayerにのみ登録する(symbolLayerにも登録すると、同じ座標の
-            // ポイントで両方のレイヤーのクリックイベントが発火し、二重に遷移が
-            // トリガーされてしまうため)。
-            const handleClick = (e: atlas.MapMouseEvent) => {
+            // ---- ドラッグでの位置修正(機能要件#30/#31、更新権限がある場合のみ) ----
+            // Azure Mapsのデータ駆動レイヤーはネイティブのドラッグ操作を持たないため、
+            // mousedown→mousemove→mouseupを自前で追跡する定番の実装パターンを使う。
+            let draggedShape: atlas.Shape | null = null;
+            let didDrag = false;
+
+            map.events.add("mousedown", bubbleLayer, (e) => {
+                if (!canEditPositionRef.current) return;
                 const shape = e.shapes?.[0];
                 if (!(shape instanceof atlas.Shape)) return;
-                const id = (shape.getProperties() as { id?: string }).id;
-                if (id) onRecordClickRef.current?.(id);
-            };
-            map.events.add("click", bubbleLayer, handleClick);
+                draggedShape = shape;
+                didDrag = false;
+                // dragPanInteractionはここで無効化するのではなく、下のmouseenterで
+                // ポイントにマウスが乗った時点で先に無効化しておく。mousedown後に
+                // 無効化すると、地図自体のパン操作(ドラッグ)と競合し、ポイントではなく
+                // 地図全体が動いてしまうことがあるため。
+                map.getCanvasContainer().style.cursor = "grabbing";
+            });
+
+            map.events.add("mousemove", (e) => {
+                if (!draggedShape || !e.position) return;
+                didDrag = true;
+                draggedShape.setCoordinates(e.position);
+            });
+
+            map.events.add("mouseup", () => {
+                if (!draggedShape) return;
+                // ドロップ位置がbubbleLayerの外(=マウスを乗せたままのmouseleaveが
+                // 発生しない場所)である可能性があるため、ここでも明示的に復元する。
+                map.setUserInteraction({ dragPanInteraction: true });
+                map.getCanvasContainer().style.cursor = "grab";
+                if (didDrag) {
+                    const id = (draggedShape.getProperties() as { id?: string }).id;
+                    const coords = draggedShape.getCoordinates() as atlas.data.Position;
+                    if (id) onPositionChangedRef.current?.(id, coords[1], coords[0]);
+                }
+                draggedShape = null;
+            });
+
+            // ---- クリック: ポイントなら詳細画面へ遷移(#28)、
+            //      空き地なら新規登録(#29、作成権限がある場合のみ) ----
+            map.events.add("click", (e: atlas.MapMouseEvent) => {
+                if (didDrag) {
+                    // ドラッグ操作の直後に発生するクリックは無視する。
+                    didDrag = false;
+                    return;
+                }
+                const shape = e.shapes?.[0];
+                if (shape instanceof atlas.Shape) {
+                    const id = (shape.getProperties() as { id?: string }).id;
+                    if (id) onRecordClickRef.current?.(id);
+                    return;
+                }
+                if (canCreateRef.current && e.position) {
+                    onCreateNewRef.current?.(e.position[1], e.position[0]);
+                }
+            });
+
+            // ポイントにマウスが乗った時点で、地図自体のパン操作を先に無効化しておく。
+            // (mousedown時点で無効化すると、地図のパンとポイントのドラッグが競合し、
+            //  ポイントではなく地図全体が動いてしまうことがあるため)
             map.events.add("mouseenter", bubbleLayer, () => {
-                map.getCanvasContainer().style.cursor = "pointer";
+                if (canEditPositionRef.current) {
+                    map.setUserInteraction({ dragPanInteraction: false });
+                }
+                map.getCanvasContainer().style.cursor = canEditPositionRef.current ? "grab" : "pointer";
             });
             map.events.add("mouseleave", bubbleLayer, () => {
-                map.getCanvasContainer().style.cursor = "grab";
+                if (!draggedShape) {
+                    map.setUserInteraction({ dragPanInteraction: true });
+                }
+                map.getCanvasContainer().style.cursor = "default";
             });
         });
 
