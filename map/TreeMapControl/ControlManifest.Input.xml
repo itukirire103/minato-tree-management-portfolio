@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="TreeMapPCF" constructor="TreeMapControl" version="0.0.5" display-name-key="TreeMapControl" description-key="TreeMapControl description" control-type="virtual" >
+  <control namespace="TreeMapPCF" constructor="TreeMapControl" version="0.0.7" display-name-key="TreeMapControl" description-key="TreeMapControl description" control-type="virtual" >
     <!--
-      外部サービス(Azure Maps / Entra ID)を呼び出すため enabled="true" にしている。
+      外部サービス(Azure Maps)を呼び出すため enabled="true" にしている。
       これにより本コントロールは「プレミアムコントロール」扱いになるが、
       本プロジェクトは元々Dataverseテーブル利用のためPremiumライセンスを前提としており、
       追加コストは発生しない(project_meta.json のハイライトにも記載予定)。
+      当初はEntra ID(AAD)ポップアップ認証も検討したが、iframeの入れ子構造に起因する
+      timed_outエラーが解消できず断念し、環境変数+サブスクリプションキー方式に切り替えた
+      (経緯は map/deprecated/README.md を参照)。login.microsoftonline.comへの
+      ドメイン許可はその名残だったため削除した。
     -->
     <external-service-usage enabled="true">
       <domain>atlas.microsoft.com</domain>
-      <domain>login.microsoftonline.com</domain>
     </external-service-usage>
 
     <!-- dataset node represents a set of entity records on CDS; allow more than one datasets -->
@@ -28,7 +31,6 @@
     <resources>
       <code path="index.ts" order="1"/>
       <platform-library name="React" version="16.14.0" />
-      <html path="popup.html" order="2" />
     </resources>
     <feature-usage>
       <uses-feature name="WebAPI" required="true" />

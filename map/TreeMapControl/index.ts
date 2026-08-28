@@ -2,7 +2,7 @@ import { IInputs, IOutputs } from "./generated/ManifestTypes";
 import { TreeMap, ITreeMapProps, ITreeRecord } from "./TreeMap";
 import * as React from "react";
 
-// setup_azure_maps_aad.ps1 / create_env_variable.py で作成した環境変数のスキーマ名
+// create_env_variable.py で作成した環境変数のスキーマ名
 const SUBSCRIPTION_KEY_SCHEMA_NAME = "new_AzureMapsSubscriptionKey";
 
 export class TreeMapControl implements ComponentFramework.ReactControl<IInputs, IOutputs> {
@@ -48,14 +48,25 @@ export class TreeMapControl implements ComponentFramework.ReactControl<IInputs, 
                 } else {
                     console.error(`[TreeMap] 環境変数『${SUBSCRIPTION_KEY_SCHEMA_NAME}』の値が見つかりません。`);
                 }
-                this.notifyOutputChanged();
-                console.log("[TreeMap] notifyOutputChangedを呼び出しました。");
+                this.scheduleNotifyOutputChanged();
                 return;
             })
             .catch((error: Error) => {
                 console.error("[TreeMap] 環境変数の取得に失敗しました:", error);
-                this.notifyOutputChanged();
+                this.scheduleNotifyOutputChanged();
             });
+    }
+
+    // 初回のコールド起動時、データセットのロードと同じタイミングでコントロールの
+    // インスタンスが作り直されることがあり、その最中にnotifyOutputChanged()を
+    // 同期的に呼ぶとプラットフォームの再描画スケジューラがシグナルを取りこぼし、
+    // 「地図の設定を読み込んでいます...」のまま止まることがある(要ハードリロード)。
+    // setTimeoutでマクロタスクまで遅延させることで、この競合を回避する。
+    private scheduleNotifyOutputChanged(): void {
+        setTimeout(() => {
+            this.notifyOutputChanged();
+            console.log("[TreeMap] notifyOutputChangedを呼び出しました。");
+        }, 0);
     }
 
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {

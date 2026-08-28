@@ -16,7 +16,7 @@ map/**/generated/
 Thumbs.db
 
 # 環境固有の識別情報(テナントID・クライアントID等。秘密鍵そのものではないが公開リポジトリには含めない)
-map/aad_setup_result.json
+map/deprecated/aad_setup_result.json
 
 # 作業中の一時ログ
 *.log
