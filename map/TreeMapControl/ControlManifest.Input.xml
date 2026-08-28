@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="TreeMapPCF" constructor="TreeMapControl" version="0.0.7" display-name-key="TreeMapControl" description-key="TreeMapControl description" control-type="virtual" >
+  <control namespace="TreeMapPCF" constructor="TreeMapControl" version="0.0.8" display-name-key="TreeMapControl" description-key="TreeMapControl description" control-type="virtual" >
     <!--
       外部サービス(Azure Maps)を呼び出すため enabled="true" にしている。
       これにより本コントロールは「プレミアムコントロール」扱いになるが、

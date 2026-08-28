@@ -5,11 +5,19 @@ import * as React from "react";
 // create_env_variable.py で作成した環境変数のスキーマ名
 const SUBSCRIPTION_KEY_SCHEMA_NAME = "new_AzureMapsSubscriptionKey";
 
+// モジュールスコープのキャッシュ(クラスのインスタンスフィールドではない)。
+// 初回のコールド起動時、データセットのロードと連動してコントロールのインスタンス自体が
+// 複数回作り直されることがある。インスタンス単位でキーを持つと、作り直されるたびに
+// 「非同期フェッチ→notifyOutputChanged→再描画」の競合が発生し、そのタイミング次第で
+// 「地図の設定を読み込んでいます...」のまま止まる(要ハードリロード)。
+// モジュールスコープに持たせることで、何度作り直されても2回目以降のインスタンスは
+// updateView()の最初の呼び出しで同期的にキャッシュ済みの値を使えるため、この競合が起きない。
+let cachedSubscriptionKey: string | null = null;
+let fetchPromise: Promise<void> | null = null;
+
 export class TreeMapControl implements ComponentFramework.ReactControl<IInputs, IOutputs> {
     private notifyOutputChanged: () => void;
     private context: ComponentFramework.Context<IInputs>;
-    private subscriptionKey: string | null = null;
-    private keyFetchStarted = false;
 
     constructor() {
         // Empty
@@ -23,55 +31,45 @@ export class TreeMapControl implements ComponentFramework.ReactControl<IInputs, 
         this.notifyOutputChanged = notifyOutputChanged;
         this.context = context;
         context.parameters.sampleDataSet.paging.setPageSize(500);
+        this.ensureSubscriptionKey();
     }
 
     // Dataverse環境変数からAzure Mapsのサブスクリプションキーを取得する。
-    // 取得できたら notifyOutputChanged() で再描画をトリガーする(このコンポーネントは
-    // Web API利用のためcontext.webAPIを使う。Dataverseに元々サインイン済みの状態を
-    // 利用するため、追加のブラウザ認証は一切発生しない)。
-    private fetchSubscriptionKey(): void {
-        if (this.keyFetchStarted) return;
-        this.keyFetchStarted = true;
+    // 既に(このモジュール内のどのインスタインスでも)取得済み、または取得中であれば
+    // 何もしない。取得できたら notifyOutputChanged() で再描画をトリガーする
+    // (このコンポーネントはWeb API利用のためcontext.webAPIを使う。Dataverseに
+    // 元々サインイン済みの状態を利用するため、追加のブラウザ認証は一切発生しない)。
+    private ensureSubscriptionKey(): void {
+        if (cachedSubscriptionKey !== null || fetchPromise !== null) return;
         console.log("[TreeMap] 環境変数の取得を開始します。");
 
         const options =
             "?$select=value&$expand=EnvironmentVariableDefinitionId" +
             `&$filter=(EnvironmentVariableDefinitionId/schemaname eq '${SUBSCRIPTION_KEY_SCHEMA_NAME}')`;
 
-        this.context.webAPI
+        fetchPromise = this.context.webAPI
             .retrieveMultipleRecords("environmentvariablevalue", options)
             .then((result) => {
                 console.log("[TreeMap] 環境変数の取得結果:", result);
                 if (result.entities.length > 0) {
-                    this.subscriptionKey = result.entities[0].value as string;
-                    console.log("[TreeMap] キーを取得しました(先頭5文字):", this.subscriptionKey.substring(0, 5));
+                    cachedSubscriptionKey = result.entities[0].value as string;
+                    console.log("[TreeMap] キーを取得しました(先頭5文字):", cachedSubscriptionKey.substring(0, 5));
                 } else {
                     console.error(`[TreeMap] 環境変数『${SUBSCRIPTION_KEY_SCHEMA_NAME}』の値が見つかりません。`);
                 }
-                this.scheduleNotifyOutputChanged();
+                this.notifyOutputChanged();
+                console.log("[TreeMap] notifyOutputChangedを呼び出しました。");
                 return;
             })
             .catch((error: Error) => {
                 console.error("[TreeMap] 環境変数の取得に失敗しました:", error);
-                this.scheduleNotifyOutputChanged();
+                fetchPromise = null; // リトライできるようにする
             });
-    }
-
-    // 初回のコールド起動時、データセットのロードと同じタイミングでコントロールの
-    // インスタンスが作り直されることがあり、その最中にnotifyOutputChanged()を
-    // 同期的に呼ぶとプラットフォームの再描画スケジューラがシグナルを取りこぼし、
-    // 「地図の設定を読み込んでいます...」のまま止まることがある(要ハードリロード)。
-    // setTimeoutでマクロタスクまで遅延させることで、この競合を回避する。
-    private scheduleNotifyOutputChanged(): void {
-        setTimeout(() => {
-            this.notifyOutputChanged();
-            console.log("[TreeMap] notifyOutputChangedを呼び出しました。");
-        }, 0);
     }
 
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
         this.context = context;
-        this.fetchSubscriptionKey();
+        this.ensureSubscriptionKey();
 
         const dataSet = context.parameters.sampleDataSet;
         const records: ITreeRecord[] = dataSet.sortedRecordIds.map((id: string) => {
@@ -85,7 +83,7 @@ export class TreeMapControl implements ComponentFramework.ReactControl<IInputs, 
             };
         });
 
-        const props: ITreeMapProps = { records, subscriptionKey: this.subscriptionKey };
+        const props: ITreeMapProps = { records, subscriptionKey: cachedSubscriptionKey };
         return React.createElement(TreeMap, props);
     }
 
