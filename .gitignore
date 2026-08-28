@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Node / PCF (map/)
+node_modules/
+/map/out/
+/map/bin/
+/map/obj/
+map/**/generated/
+*.binlog
+.vs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 環境固有の識別情報(テナントID・クライアントID等。秘密鍵そのものではないが公開リポジトリには含めない)
+map/aad_setup_result.json
+
+# 作業中の一時ログ
+*.log

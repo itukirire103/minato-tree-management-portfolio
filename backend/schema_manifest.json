@@ -1,0 +1,349 @@
+{
+  "tree": {
+    "display": "樹木マスタ",
+    "columns": [
+      {
+        "suffix": "TreeNumber",
+        "display": "樹木番号"
+      },
+      {
+        "suffix": "RouteNumber",
+        "display": "路線番号"
+      },
+      {
+        "suffix": "Address",
+        "display": "住居表示"
+      },
+      {
+        "suffix": "TreeHeight",
+        "display": "樹高(m)"
+      },
+      {
+        "suffix": "TrunkGirth",
+        "display": "幹周(cm)"
+      },
+      {
+        "suffix": "CrownSpread",
+        "display": "枝張(m)"
+      },
+      {
+        "suffix": "Notes",
+        "display": "備考"
+      },
+      {
+        "suffix": "Species",
+        "display": "樹種"
+      },
+      {
+        "suffix": "LeafType",
+        "display": "常緑落葉区分"
+      },
+      {
+        "suffix": "SizeClass",
+        "display": "樹木区分"
+      },
+      {
+        "suffix": "HealthStatus",
+        "display": "現在の健全度"
+      },
+      {
+        "suffix": "Status",
+        "display": "ステータス"
+      },
+      {
+        "suffix": "PlantedDate",
+        "display": "植樹年月日"
+      },
+      {
+        "suffix": "HasStake",
+        "display": "支柱の有無"
+      },
+      {
+        "suffix": "HasTag",
+        "display": "管理札の有無"
+      },
+      {
+        "suffix": "Latitude",
+        "display": "緯度"
+      },
+      {
+        "suffix": "Longitude",
+        "display": "経度"
+      },
+      {
+        "suffix": "ReplantFromTreeId",
+        "display": "植替え前樹木ID"
+      }
+    ]
+  },
+  "diagnosis": {
+    "display": "樹木診断結果",
+    "columns": [
+      {
+        "suffix": "DiagnosisNumber",
+        "display": "診断記録番号"
+      },
+      {
+        "suffix": "DiagnosisDate",
+        "display": "診断日"
+      },
+      {
+        "suffix": "Arborist",
+        "display": "樹木医名"
+      },
+      {
+        "suffix": "Vigor",
+        "display": "樹勢(活力診断)"
+      },
+      {
+        "suffix": "Shape",
+        "display": "樹形(活力診断)"
+      },
+      {
+        "suffix": "RootFindings",
+        "display": "根元_腐朽空洞等所見"
+      },
+      {
+        "suffix": "TrunkFindings",
+        "display": "幹_腐朽空洞等所見"
+      },
+      {
+        "suffix": "BranchFindings",
+        "display": "大枝_腐朽空洞等所見"
+      },
+      {
+        "suffix": "VisualJudgement",
+        "display": "外観診断判定"
+      },
+      {
+        "suffix": "OverallJudgement",
+        "display": "総合判定"
+      },
+      {
+        "suffix": "JudgementReason",
+        "display": "判定理由"
+      },
+      {
+        "suffix": "NextDiagnosisTiming",
+        "display": "次回診断予定時期"
+      },
+      {
+        "suffix": "NeedsDetailedDiagnosis",
+        "display": "精密診断要否"
+      },
+      {
+        "suffix": "DecayHollowRate",
+        "display": "精密診断_腐朽空洞率(%)"
+      },
+      {
+        "suffix": "DiagnosisReportFile",
+        "display": "診断カルテ添付ファイル"
+      },
+      {
+        "suffix": "TreeId",
+        "display": "樹木ID"
+      }
+    ]
+  },
+  "inspection": {
+    "display": "点検記録",
+    "columns": [
+      {
+        "suffix": "InspectionNumber",
+        "display": "点検記録番号"
+      },
+      {
+        "suffix": "InspectionDate",
+        "display": "点検日"
+      },
+      {
+        "suffix": "Inspector",
+        "display": "点検者"
+      },
+      {
+        "suffix": "OverRoadLimit",
+        "display": "建築限界越え_車道側"
+      },
+      {
+        "suffix": "OverSidewalkLimit",
+        "display": "建築限界越え_歩道側"
+      },
+      {
+        "suffix": "ConflictWithFacility",
+        "display": "道路施設との競合"
+      },
+      {
+        "suffix": "StakeNeedsFix",
+        "display": "支柱直し撤去"
+      },
+      {
+        "suffix": "BigBranchDamage",
+        "display": "太枝枯れ折れ"
+      },
+      {
+        "suffix": "RootLiftPavementCrack",
+        "display": "根上がり舗装クラック"
+      },
+      {
+        "suffix": "LeafAbnormal",
+        "display": "葉の状態異常"
+      },
+      {
+        "suffix": "TipDieback",
+        "display": "先端枝の枯れ"
+      },
+      {
+        "suffix": "SevereDecline",
+        "display": "枯死著しい衰弱"
+      },
+      {
+        "suffix": "Mushroom",
+        "display": "キノコの有無"
+      },
+      {
+        "suffix": "BarkDecay",
+        "display": "樹皮枯死欠損腐朽"
+      },
+      {
+        "suffix": "PestDamage",
+        "display": "病虫害"
+      },
+      {
+        "suffix": "Swaying",
+        "display": "揺れ"
+      },
+      {
+        "suffix": "UnnaturalLean",
+        "display": "不自然な傾斜"
+      },
+      {
+        "suffix": "InspectionResult",
+        "display": "点検結果"
+      },
+      {
+        "suffix": "OtherNotes",
+        "display": "その他特記事項"
+      },
+      {
+        "suffix": "TreeId",
+        "display": "樹木ID"
+      }
+    ]
+  },
+  "vendor": {
+    "display": "委託業者・協定管理者マスタ",
+    "columns": [
+      {
+        "suffix": "VendorName",
+        "display": "事業者名"
+      },
+      {
+        "suffix": "VendorType",
+        "display": "区分"
+      },
+      {
+        "suffix": "AreaInCharge",
+        "display": "担当路線・エリア"
+      },
+      {
+        "suffix": "ContactInfo",
+        "display": "連絡先"
+      }
+    ]
+  },
+  "workhistory": {
+    "display": "作業履歴",
+    "columns": [
+      {
+        "suffix": "WorkNumber",
+        "display": "作業記録番号"
+      },
+      {
+        "suffix": "WorkType",
+        "display": "作業種別"
+      },
+      {
+        "suffix": "WorkDate",
+        "display": "作業日"
+      },
+      {
+        "suffix": "PerformerType",
+        "display": "実施者区分"
+      },
+      {
+        "suffix": "WorkNotes",
+        "display": "作業内容メモ"
+      },
+      {
+        "suffix": "TreeId",
+        "display": "樹木ID"
+      },
+      {
+        "suffix": "VendorId",
+        "display": "実施事業者"
+      }
+    ]
+  },
+  "replant": {
+    "display": "植替え履歴",
+    "columns": [
+      {
+        "suffix": "ReplantNumber",
+        "display": "植替え記録番号"
+      },
+      {
+        "suffix": "ReplantDate",
+        "display": "植替え日"
+      },
+      {
+        "suffix": "Background",
+        "display": "経緯・備考"
+      },
+      {
+        "suffix": "OldTreeId",
+        "display": "旧樹木ID"
+      },
+      {
+        "suffix": "NewTreeId",
+        "display": "新樹木ID"
+      }
+    ]
+  },
+  "complaint": {
+    "display": "苦情・陳情記録",
+    "columns": [
+      {
+        "suffix": "ComplaintNumber",
+        "display": "苦情記録番号"
+      },
+      {
+        "suffix": "RouteNumber",
+        "display": "路線番号"
+      },
+      {
+        "suffix": "RequestDate",
+        "display": "依頼日"
+      },
+      {
+        "suffix": "RequestContent",
+        "display": "依頼内容"
+      },
+      {
+        "suffix": "ResponseDate",
+        "display": "対応日"
+      },
+      {
+        "suffix": "ResponseRecord",
+        "display": "対応記録"
+      },
+      {
+        "suffix": "Status",
+        "display": "ステータス"
+      },
+      {
+        "suffix": "TreeId",
+        "display": "樹木ID"
+      }
+    ]
+  }
+}

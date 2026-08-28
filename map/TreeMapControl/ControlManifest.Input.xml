@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="TreeMapPCF" constructor="TreeMapControl" version="0.0.5" display-name-key="TreeMapControl" description-key="TreeMapControl description" control-type="virtual" >
+    <!--
+      外部サービス(Azure Maps / Entra ID)を呼び出すため enabled="true" にしている。
+      これにより本コントロールは「プレミアムコントロール」扱いになるが、
+      本プロジェクトは元々Dataverseテーブル利用のためPremiumライセンスを前提としており、
+      追加コストは発生しない(project_meta.json のハイライトにも記載予定)。
+    -->
+    <external-service-usage enabled="true">
+      <domain>atlas.microsoft.com</domain>
+      <domain>login.microsoftonline.com</domain>
+    </external-service-usage>
+
+    <!-- dataset node represents a set of entity records on CDS; allow more than one datasets -->
+    <data-set name="sampleDataSet" display-name-key="Dataset_Display_Key">
+      <!--
+        樹木マスタの列を、地図描画に必要な列として明示的に要求する。
+        ビューにこれらの列が含まれていなくても、代替コントロール設定時に
+        メーカーがマッピングを求められる。
+      -->
+      <property-set name="latitude" display-name-key="Latitude" description-key="緯度" of-type="Decimal" usage="bound" required="true" />
+      <property-set name="longitude" display-name-key="Longitude" description-key="経度" of-type="Decimal" usage="bound" required="true" />
+      <property-set name="treeNumber" display-name-key="TreeNumber" description-key="樹木番号" of-type="SingleLine.Text" usage="bound" required="true" />
+      <property-set name="healthStatus" display-name-key="HealthStatus" description-key="現在の健全度(ピンの色分けに使用、任意)" of-type="OptionSet" usage="bound" required="false" />
+    </data-set>
+
+    <resources>
+      <code path="index.ts" order="1"/>
+      <platform-library name="React" version="16.14.0" />
+      <html path="popup.html" order="2" />
+    </resources>
+    <feature-usage>
+      <uses-feature name="WebAPI" required="true" />
+    </feature-usage>
+  </control>
+</manifest>

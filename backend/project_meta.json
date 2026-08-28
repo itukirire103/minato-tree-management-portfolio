@@ -1,0 +1,85 @@
+{
+  "title": "(仮称)樹木管理システム 構築プロジェクト",
+  "tagline": "港区の公募型プロポーザル仕様書をベースにした、Power Platform(Dataverse)によるフルスクラッチ相当の個人ポートフォリオ",
+  "purpose": "東京都港区が公表した「(仮称)樹木管理システム構築業務委託」の公募資料(仕様書・機能要件表・非機能要件表)を教材として、実在の自治体調達仕様に基づいた業務システムを個人で設計・構築したプロジェクトです。実際の港区案件への提出物ではなく、公開情報を参考にした学習・ポートフォリオ目的の制作物です。",
+  "tech_stack": [
+    "Microsoft Power Platform (Power Apps / Dataverse / Power Automate)",
+    "Dataverse Web API (REST) によるテーブル・セキュリティロールのコード管理(Infrastructure as Code)",
+    "Power Automate クラウドフローによるテーブル横断の業務ロジック自動化",
+    "Python (msal, requests) による自動構築・自動検証スクリプト",
+    "Microsoft Entra ID による認証・多要素認証",
+    "Excel(openpyxl) による要件マッピング・設計ドキュメントの自動生成"
+  ],
+  "relationships": [
+    {"from": "tree", "to": "diagnosis", "label": "1本の樹木に複数回の診断結果"},
+    {"from": "tree", "to": "inspection", "label": "1本の樹木に複数回の点検記録"},
+    {"from": "tree", "to": "workhistory", "label": "1本の樹木に複数の作業履歴"},
+    {"from": "vendor", "to": "workhistory", "label": "1事業者が複数の作業を実施"},
+    {"from": "tree", "to": "replant", "label": "旧樹木としての参照"},
+    {"from": "tree", "to": "complaint", "label": "1本の樹木に複数の苦情(任意)"}
+  ],
+  "harness_design": {
+    "build": "dataverse_common.py に認証・テーブル/列作成・冪等性チェックを共通化し、各 create_xxx_table.py はスキーマの宣言だけで完結する構成。実行のたびに schema_manifest.json へ自己申告することで、実装と検証の情報源を一本化している。なお、Web API経由で作成した列はフォーム/ビューには自動反映されないため、UI上での動作確認時はフォームへの列追加が別途必要になる点を運用上の注意点として把握している。",
+    "verify": "verify_schema.py がschema_manifest.jsonを、verify_security_roles.pyがcreate_security_roles.pyの権限マトリクスを、それぞれ「期待値」としてDataverseの実際の状態と自動突合。手作業での目視確認を最小化している。",
+    "docs": "本ドキュメント自体も、schema_manifest.json(データモデル)とcreate_security_roles.pyの権限マトリクス(セキュリティ設計)を単一の情報源として自動生成している。テーブルやロールを追加するたびに、このスクリプトを再実行するだけでREADME・資料が最新化される。"
+  },
+  "highlights": [
+    {
+      "title": "Dataverseのテーブル・セキュリティロールを完全にコード化(Infrastructure as Code)",
+      "body": "通常GUIで作成されることが多いDataverseのテーブル定義・セキュリティロールを、Web API呼び出しのPythonスクリプトとして実装。冪等性(何度実行しても安全)を持たせ、7テーブル・78列・6セキュリティロール・95権限をすべてコードから再現可能にした。"
+    },
+    {
+      "title": "自己検証するインフラ構成(自己申告マニフェスト+自動検証ハーネス)",
+      "body": "各構築スクリプトが実行結果を schema_manifest.json に自己申告し、検証スクリプトがそれを期待値としてDataverseの実状態と突合する設計。目視確認に頼らず、コマンド一発でテーブル・権限の整合性を保証できる。"
+    },
+    {
+      "title": "自治体調達仕様の要件定義を、アーキテクチャ選定・コスト試算まで一貫して実施",
+      "body": "機能要件表35項目・非機能要件表44項目を複数のアーキテクチャ候補(専用SaaS/汎用GIS+ローコード/Azure/AWSのマネージドサービス)と突き合わせて評価し、実装方針を選定。Power Platformライセンス費用も利用規模に応じて試算した。"
+    },
+    {
+      "title": "テーブル横断の業務ロジックをPower Automateで自動化し、実際の因果関係で検証",
+      "body": "「樹木診断結果が登録されると樹木マスタの健全度が自動更新される」「植替え履歴が登録されると旧樹木のステータスが『植替え済』に自動更新される」という2本のテーブル横断ロジックをPower Automateクラウドフローで実装。1本目の実装時に「値は正しく更新されているのに画面上は確認できない」という事象に直面したが、憶測で修正せず実行履歴のエラーログを確認して原因(APIで作成した列はフォームに自動反映されない、トリガー条件と実際の操作の不一致)を特定。その知見を2本目の実装に活かし、事前にフォーム側の準備を整えることで一度のテストで正常動作を確認できた。"
+    },
+    {
+      "title": "API自動化とGUI操作を、対象の性質に応じて使い分け",
+      "body": "テーブル定義やセキュリティロールなど宣言的でスキーマが明確な部分はWeb API+Pythonでコード化する一方、セキュリティロールの権限マッピングやモデル駆動型アプリ、Power Automateフローのように定義が複雑でGUIでの作成が実務上標準的な部分は、素直にPower Apps上で構築。「何でも自動化する」のではなく、対象ごとに適切な手段を選ぶ判断を行った。"
+    },
+    {
+      "title": "地図機能(Azure Maps PCFコントロール)の多層的な障害切り分け",
+      "body": "樹木の位置をAzure Mapsで表示するPCFコントロールが「デプロイは成功するが地図が表示されない」状態に陥った際、憶測で修正せず、Dataverse Web APIへの直接クエリ(ビューへのコントロールのバインド状況)、Azure Maps REST APIへのキー直接テスト、ブラウザコンソールログの精読という3方向から原因を切り分けた。実際の原因は(1)feature-usage宣言の値が不正、(2)対象ビューが既定ビューでなかった、(3)PCFビルドツール(pcf-scripts)がnode_modules配下の既製バンドルまでBabelでトランスパイルし、Web Worker内のヘルパー関数が失われる、という3段階の複合要因だった。(3)の修正はnode_modules直下のファイルパッチのため npm install で失われる。そこで postinstall フック(fix-pcf-webpack.js)で自動再適用する仕組みを整備し、再現性を担保した。"
+    }
+  ],
+  "requirement_progress": {
+    "as_of": "2026-08-28",
+    "functional": {
+      "total": 35,
+      "done": 16,
+      "partial": 4,
+      "not_started": 11,
+      "unconfirmed": 4
+    },
+    "non_functional": {
+      "total": 44,
+      "done": 22,
+      "not_started": 16,
+      "unconfirmed": 6
+    },
+    "notable_gaps": [
+      "作業履歴(workhistory)テーブルに写真添付列が無く、機能要件#9(作業前後の写真登録)を厳密には満たしていない",
+      "地図コントロールはポイント表示・健全度による色分けまでは実装済みだが、クリックでの詳細画面遷移・ドラッグでの位置修正・地図上からの新規登録(機能要件#28〜32)は未実装",
+      "テスト計画書・運用手順書・研修資料等の文書系成果物(非機能要件#9・#10・#17・#29・#41〜44等)は未作成",
+      "MFA・条件付きアクセス、Dataverse監査ログは未設定(非機能要件#23・#31・#32)。個人検証環境のため未実施だが、本番想定なら優先度が高い",
+      "Dataverseのバックアップ復元・ポイントインタイム復元は未実演(非機能要件#37・#39)"
+    ],
+    "detail_source": "機能要件_アーキテクチャ選定マッピング_v2.xlsx / 非機能要件_ポートフォリオ実装可否マッピング.xlsx の「実装状況」列に項目別の判定根拠を記録(2026-08-28時点のコードベースとの突き合わせ)"
+  },
+  "setup_steps": [
+    "pip install msal requests python-docx",
+    "Power Platform管理センターで環境のURLを確認",
+    "py create_tree_table.py など、各 create_xxx_table.py を順番に実行(初回のみ、以後は run_batch.py で一括実行可)",
+    "py create_security_roles.py でセキュリティロールを構築",
+    "py verify_schema.py / py verify_security_roles.py で整合性を検証",
+    "py generate_docs.py で本ドキュメントを最新化"
+  ],
+  "disclaimer": "本プロジェクトは東京都港区が公表した公募資料を参考にした個人の学習・ポートフォリオ目的の制作物であり、港区への正式な提案書・提出物ではありません。"
+}

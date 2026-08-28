@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>認証処理中</title>
+</head>
+<body>
+    <!--
+      MSAL.jsの認証結果(ポップアップ/サイレント認証)を受け取るための、
+      あえて何もしない中継用ページ。
+      同一オリジン(このDataverse環境)に置くことが重要で、
+      MSALがここのURLフラグメントから認証結果を回収する。
+    -->
+    <script>
+        // MSALがwindow.openerに対して結果を伝搬する処理は
+        // msal-browser側が自動的に行うため、ここには何も書かない。
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "TreeMapPCF.TreeMapControl": {
+    "display": "樹木マップ(地図表示PCFコンポーネント)",
+    "namespace": "TreeMapPCF",
+    "constructor": "TreeMapControl",
+    "dataset": "sampleDataSet",
+    "bound_columns": ["latitude", "longitude", "treeNumber", "healthStatus"],
+    "deployed_via": "pac pcf push --publisher-prefix new"
+  }
+}
